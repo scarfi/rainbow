@@ -1,6 +1,12 @@
-# rainbow — Project plan
+# rainbow - Project plan
 
 Planning baseline: 7 September 2026.
+
+## Implementation status
+
+The first offline application slice is implemented locally: SvelteKit, Dexie storage, equipment setups, session drafts, notes, standard-face selection (40, 60, 80, and 122 cm), 10-zone scoring, four-point Beursault scoring with honneurs/points/chapelets/noirs, unfinished-end persistence, a training journal, JSON export, and an application-shell service worker. English and French interfaces are included. Automated persistence and cache tests pass; actual device offline verification remains open. Cloud synchronization, authentication, media, and community features are not implemented.
+
+The repository is connected to GitHub. Implementation is integrated through feature branches and pull requests. GitHub Actions validates changes and deploys main to GitHub Pages when Pages is enabled. The project owner requested offline development before creating a Supabase project.
 
 ## Product direction
 
@@ -89,16 +95,16 @@ Equipment exploration, reviews, learning resources, and discovery of archery dis
 
 ## Proposed architecture
 
-| Layer | Choice | Responsibility |
-| --- | --- | --- |
-| Interface | Svelte + TypeScript | Responsive, lightweight training interface |
-| Application | SvelteKit | Routing and server endpoints |
-| Offline app loading | PWA + service worker | Cache the application shell and necessary assets |
-| Local data | IndexedDB + Dexie.js | Sessions, drafts, equipment, and pending changes |
-| Backend | Supabase PostgreSQL | Persistent synchronized and community data |
-| Accounts | Supabase Auth | Identity and access |
-| Media | Supabase Storage | Uploaded photos and videos |
-| Synchronization | Explicit queue + server API | Push/pull changes, retries, and conflicts |
+| Layer               | Choice                      | Responsibility                                   |
+| ------------------- | --------------------------- | ------------------------------------------------ |
+| Interface           | Svelte + TypeScript         | Responsive, lightweight training interface       |
+| Application         | SvelteKit                   | Routing and server endpoints                     |
+| Offline app loading | PWA + service worker        | Cache the application shell and necessary assets |
+| Local data          | IndexedDB + Dexie.js        | Sessions, drafts, equipment, and pending changes |
+| Backend             | Supabase PostgreSQL         | Persistent synchronized and community data       |
+| Accounts            | Supabase Auth               | Identity and access                              |
+| Media               | Supabase Storage            | Uploaded photos and videos                       |
+| Synchronization     | Explicit queue + server API | Push/pull changes, retries, and conflicts        |
 
 These are planning choices; validate them in the offline prototype before expanding implementation. Dexie and Supabase do not automatically supply a complete synchronization system together.
 
@@ -150,7 +156,7 @@ Acceptance criteria:
 
 ## Next steps
 
-1. Connect this project to GitHub and establish repository settings.
+1. Review the first offline implementation and run the real-device checklist.
 2. Define the first session form and scoring formats.
 3. Scaffold the application and local database.
 4. Implement and validate the offline milestone.
@@ -158,7 +164,7 @@ Acceptance criteria:
 
 ## Open decisions
 
-- Initial interface languages; French and English terminology is documented, but interface language scope is undecided.
+- English and French are required initially and implemented through typed translation catalogs. Additional languages remain future scope.
 - Exact session fields and scoring formats for the first release.
 - Photo/video limits and first-release media support.
 - Conflict-resolution interaction across devices.
