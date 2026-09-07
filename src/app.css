@@ -137,31 +137,6 @@ nav button.active {
 nav button:hover {
   background: #233c54;
 }
-.sidebar-bottom {
-  margin-top: auto;
-  padding: 28px 10px 0;
-}
-.sidebar-bottom strong {
-  display: block;
-  font-size: 0.9rem;
-}
-.sidebar-bottom p {
-  color: #a9b9ca;
-  font-size: 0.85rem;
-  margin-top: 5px;
-}
-.sidebar-bottom .text-button {
-  color: #d2e1ef;
-  font-size: 0.85rem;
-  padding: 0;
-  margin-top: 25px;
-}
-.tiny-target {
-  font-size: 2rem;
-  color: #f9c64c;
-  display: block;
-  margin-bottom: 10px;
-}
 main {
   margin-left: 234px;
   flex: 1;
@@ -728,8 +703,7 @@ textarea {
     width: 28px;
     height: 28px;
   }
-  .nav-caption,
-  .sidebar-bottom {
+  .nav-caption {
     display: none;
   }
   nav {
