@@ -50,6 +50,13 @@ Read README.md and PROJECT_PLAN.md before expanding scope. Preserve the agreed S
 - Do not discard local data during application or schema updates.
 - Keep private data and secrets out of source control, logs, and service-worker caches.
 
+## Secrets and credentials
+
+- Never commit private keys, passwords, API secrets, access tokens, service-role keys, or other credentials to Git, including in code, configuration, fixtures, documentation, or generated files.
+- Keep secrets in ignored local environment files or an appropriate secret manager. Use placeholders in committed examples.
+- Review staged changes for secrets before every commit. Ensure files containing credentials are ignored before staging them.
+- If a secret is accidentally committed, stop sharing it, notify the owner, and arrange revocation or rotation. Deleting it in a later commit does not remove it from Git history.
+
 ## Verification and delivery
 
 - Run npm run check, npm test, npm run build, npm run size, and npm run format:check for relevant implementation changes.

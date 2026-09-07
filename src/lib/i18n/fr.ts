@@ -173,4 +173,73 @@ export const fr: Record<MessageKey, string> = {
   'Start a new session to change the target face.':
     'Commencez une nouvelle séance pour changer de blason.',
   'Saved target': 'Blason enregistré',
+  'Session duration': 'Durée de la séance',
+  Start: 'Démarrer',
+  Stop: 'Arrêter',
+  'Or enter minutes manually': 'Ou saisir la durée en minutes',
+  'Session format': 'Format de séance',
+  'Free practice': 'Entraînement libre',
+  'Beursault · 10 haltes · 20 arrows': 'Beursault · 10 haltes · 20 flèches',
+  'Beursault · 20 haltes · 40 arrows': 'Beursault · 20 haltes · 40 flèches',
+  'Progression arrow · 36 arrows': 'Flèche de progression · 36 flèches',
+  'Progression level': 'Flèche visée',
+  White: 'Blanche',
+  Black: 'Noire',
+  Blue: 'Bleue',
+  Red: 'Rouge',
+  Yellow: 'Jaune',
+  Bronze: 'Bronze',
+  Silver: 'Argent',
+  Gold: 'Or',
+  'Reference bow': 'Arc de référence',
+  'Training benchmark; official awards are validated by your club.':
+    'Repère d’entraînement ; les distinctions officielles sont validées par votre club.',
+  'Barebow uses the recurve training benchmark here.':
+    'L’arc nu utilise ici les repères d’entraînement de l’arc classique.',
+  'One halte = two arrows, out and back. Warm-up arrows are not scored in this round.':
+    'Une halte = deux flèches, aller et retour. Les flèches d’échauffement ne sont pas comptées dans cette série.',
+  'Round progress': 'Avancement de la série',
+  'Target reached': 'Objectif atteint',
+  'Target not reached': 'Objectif non atteint',
+  'Round in progress': 'Série en cours',
+  'Incomplete round': 'Série incomplète',
+  'Shooting mode': 'Mode tir',
+  'Back to session': 'Retour à la séance',
+  'Session stopped': 'Séance arrêtée',
+  Arrow: 'Flèche',
+  Halte: 'Halte',
+  End: 'Volée',
+  'Each tap saves one arrow and advances automatically.':
+    'Chaque appui enregistre une flèche et passe automatiquement à la suivante.',
+  'Undo last arrow': 'Annuler la dernière flèche',
+  Scorecard: 'Feuille de marque',
+  'Open shooting mode': 'Ouvrir le mode tir',
+  'View scorecard': 'Voir la feuille de marque',
+  'Start a new session to change the round.':
+    'Commencez une nouvelle séance pour changer de format.',
+  'Choose a supported round.': 'Choisissez un format de séance pris en charge.',
+  'Reopen the session before scoring.':
+    'Rouvrez la séance avant de saisir des scores.',
+  'Choose a valid arrow score.': 'Choisissez un score de flèche valide.',
+  'Stop the timer before editing duration.':
+    'Arrêtez le chronomètre avant de modifier la durée.',
+  'Invalid timer state.': 'État du chronomètre invalide.',
+  'Stop the timer before finishing.':
+    'Arrêtez le chronomètre avant de terminer.',
+  'The target must match the selected round.':
+    'Le blason et la distance doivent correspondre au format choisi.',
+  'Progression rounds use ends of six arrows.':
+    'Les flèches de progression se tirent par volées de six flèches.',
+  'All arrows are recorded.': 'Toutes les flèches sont enregistrées.',
+  'Arrow activity': 'Activité de tir',
+  'active days': 'jours actifs',
+  'Calendar year': 'Année du calendrier',
+  'Monday first. Select a day to view its sessions. Drafts are included.':
+    'Du lundi au dimanche. Sélectionnez un jour pour voir ses séances. Les brouillons sont inclus.',
+  'Arrows per day': 'Flèches par jour',
+  'View a day': 'Voir un jour',
+  'Show all sessions': 'Voir toutes les séances',
+  'No sessions on this day': 'Aucune séance ce jour-là',
+  'Select another day or show all sessions.':
+    'Sélectionnez un autre jour ou affichez toutes les séances.',
 };

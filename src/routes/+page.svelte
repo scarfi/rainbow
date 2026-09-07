@@ -1,4 +1,6 @@
 <script lang="ts">
+  import ActivityCalendar from '$lib/components/ActivityCalendar.svelte';
+  import { sessionsOnDay } from '$lib/activity';
   import { base } from '$app/paths';
   import {
     translate,
@@ -7,7 +9,18 @@
     type Locale,
   } from '$lib/i18n';
   import SessionFields from '$lib/components/SessionFields.svelte';
-  import ScorePad from '$lib/components/ScorePad.svelte';
+  import TrainingTimer from '$lib/components/TrainingTimer.svelte';
+  import RoundSettings from '$lib/components/RoundSettings.svelte';
+  import RoundSummary from '$lib/components/RoundSummary.svelte';
+  import ShootingView from '$lib/components/ShootingView.svelte';
+  import {
+    recordArrow,
+    undoArrow,
+    startTimer,
+    stopTimer,
+    setManualDuration,
+    configureRound,
+  } from '$lib/training';
   import TrainingJournal from '$lib/components/TrainingJournal.svelte';
   import { onMount } from 'svelte';
   import { liveQuery } from 'dexie';
@@ -30,6 +43,7 @@
       /* Language still works for this visit. */
     }
   }
+  let shooting = $state(false);
   let view = $state<'training' | 'equipment'>('training');
   let sessions = $state<Session[]>([]),
     setups = $state<Setup[]>([]);
@@ -48,8 +62,14 @@
     setupBow = $state<BowType>('Recurve'),
     setupNotes = $state('');
   let query = $state('');
+  let selectedDay = $state<string | null>(null);
+  const daySessions = $derived(sessionsOnDay(sessions, selectedDay));
+  function selectDay(date: string | null) {
+    selectedDay = date;
+    query = '';
+  }
   const filtered = $derived(
-    sessions.filter((s) =>
+    daySessions.filter((s) =>
       `${s.title} ${s.setup?.name ?? ''} ${s.setup?.bowType ?? ''} ${s.notes}`
         .toLowerCase()
         .includes(query.toLowerCase()),
@@ -134,6 +154,7 @@
     draft = newSession();
     currentEnd = [];
     query = '';
+    selectedDay = null;
     view = 'training';
     changed();
     await flush();
@@ -153,6 +174,7 @@
     draft.setup = JSON.parse(
       JSON.stringify(setups.find((s) => s.id === id) ?? null),
     );
+    if (draft.round === 'progression') configureRound(draft, 'progression');
     changed();
   }
   function setPendingEnd(values: string[]) {
@@ -170,10 +192,28 @@
   }
   async function finish() {
     if (!draft) return;
-    if (currentEnd.length) addEnd();
+    if (currentEnd.length && draft.round !== 'progression') addEnd();
+    stopTimer(draft);
     draft.status = 'completed';
     changed();
+    if (await flush()) shooting = false;
+  }
+  function updateTraining(action: (session: Session) => void) {
+    if (!draft) return;
+    try {
+      action(draft);
+      currentEnd = [...draft.pendingEnd];
+      changed();
+    } catch (cause) {
+      error = message(cause);
+    }
+  }
+  async function openShooting() {
+    if (await flush()) shooting = true;
+  }
+  async function closeShooting() {
     await flush();
+    shooting = false;
   }
   async function addSetup(event: SubmitEvent) {
     event.preventDefault();
@@ -360,9 +400,17 @@
           >
         </div>
       </div>
+      <ActivityCalendar
+        {sessions}
+        {selectedDay}
+        {locale}
+        {t}
+        onselect={selectDay}
+      />
       <div class:has-editor={draft !== null} class="training-grid">
         <TrainingJournal
-          {sessions}
+          sessions={daySessions}
+          {selectedDay}
           {filtered}
           {loaded}
           bind:query
@@ -396,6 +444,17 @@
                 ? t(saveLabel as MessageKey)
                 : t('Ready to save')}
             </div>
+            <RoundSettings bind:session={draft} {t} onchange={changed} />
+            <TrainingTimer
+              session={draft}
+              {t}
+              onstart={() => updateTraining(startTimer)}
+              onstop={() => updateTraining(stopTimer)}
+              onmanual={(minutes) =>
+                updateTraining((session) =>
+                  setManualDuration(session, minutes),
+                )}
+            />
             <SessionFields
               bind:session={draft}
               {setups}
@@ -403,20 +462,14 @@
               onchange={changed}
               onsetup={selectSetup}
             />
-            <ScorePad
-              scoringFormat={draft.scoringFormat}
-              ends={draft.ends}
-              pendingEnd={currentEnd}
-              {t}
-              onpending={setPendingEnd}
-              onadd={addEnd}
-              onremove={(index) => {
-                if (draft) {
-                  draft.ends = draft.ends.filter((_, i) => i !== index);
-                  changed();
-                }
-              }}
-            />
+            <RoundSummary session={draft} {t} />
+            <button class="primary shooting-launch" onclick={openShooting}
+              >{t(
+                draft.status === 'draft'
+                  ? 'Open shooting mode'
+                  : 'View scorecard',
+              )}</button
+            >
             <div class="editor-actions">
               <span>{t('Only visible to you')}</span
               >{#if draft.status === 'draft'}<button
@@ -519,3 +572,23 @@
     {/if}
   </main>
 </div>
+
+{#if shooting && draft}
+  <ShootingView
+    session={draft}
+    {t}
+    {saveLabel}
+    {error}
+    onscore={(value) =>
+      updateTraining((session) => recordArrow(session, value))}
+    onundo={() => updateTraining(undoArrow)}
+    onclose={closeShooting}
+    onfinish={finish}
+    onstart={() => updateTraining(startTimer)}
+    onstop={() => updateTraining(stopTimer)}
+    onmanual={(minutes) =>
+      updateTraining((session) => setManualDuration(session, minutes))}
+    onexport={exportData}
+    onretry={() => void flush()}
+  />
+{/if}

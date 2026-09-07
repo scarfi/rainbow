@@ -1,3 +1,4 @@
+import type { RoundType, ProgressionLevel } from './training';
 export const bowTypes = ['Recurve', 'Compound', 'Barebow'] as const;
 export type BowType = (typeof bowTypes)[number];
 export type Setup = {
@@ -19,6 +20,10 @@ export type Session = {
   scoringFormat: 'ten-zone' | 'beursault';
   environment: 'Indoor' | 'Outdoor';
   duration: number;
+  timerElapsedMs: number;
+  timerStartedAt: number | null;
+  round: RoundType;
+  progressionLevel: ProgressionLevel;
   arrows: number;
   ends: string[][];
   pendingEnd: string[];
@@ -63,6 +68,10 @@ export function newSession(): Session {
     scoringFormat: 'ten-zone',
     environment: 'Indoor',
     duration: 0,
+    timerElapsedMs: 0,
+    timerStartedAt: null,
+    round: 'free',
+    progressionLevel: 'White',
     arrows: 0,
     ends: [],
     pendingEnd: [],

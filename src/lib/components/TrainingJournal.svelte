@@ -1,4 +1,5 @@
 <script lang="ts">
+  import RoundSummary from './RoundSummary.svelte';
   import BeursaultSummary from './BeursaultSummary.svelte';
   import { total, type Session } from '$lib/model';
   import type { MessageKey } from '$lib/i18n';
@@ -8,6 +9,7 @@
     loaded,
     query = $bindable(),
     selectedId,
+    selectedDay,
     t,
     dateLabel,
     onopen,
@@ -18,6 +20,7 @@
     loaded: boolean;
     query: string;
     selectedId?: string;
+    selectedDay: string | null;
     t: (key: MessageKey) => string;
     dateLabel: (date: string) => string;
     onopen: (session: Session) => void;
@@ -27,8 +30,8 @@
 
 <section class="journal">
   <div class="section-title">
-    <h2>{t('Training journal')}</h2>
-    <span>{sessions.length} {t('entries')}</span>
+    <h2>{selectedDay ? dateLabel(selectedDay) : t('Training journal')}</h2>
+    <span>{filtered.length} {t('entries')}</span>
   </div>
   <label class="search"
     ><span class="sr-only">{t('Search training')}</span><input
@@ -38,6 +41,10 @@
     /></label
   >
   {#if !loaded}<div class="empty"><h3>{t('Opening your journal…')}</h3></div>
+  {:else if sessions.length === 0 && selectedDay}<div class="empty">
+      <h3>{t('No sessions on this day')}</h3>
+      <p>{t('Select another day or show all sessions.')}</p>
+    </div>
   {:else if sessions.length === 0}<div class="empty">
       <div class="target-mark" aria-hidden="true">◎</div>
       <h3>{t('Your first arrow starts here.')}</h3>
@@ -75,9 +82,11 @@
           <div class="session-footer">
             <span><strong>{session.arrows}</strong> {t('arrows')}</span
             >{#if session.ends.length && session.scoringFormat !== 'beursault'}<span
-                ><strong>{total(session.ends)}</strong> {t('points')}</span
+                ><strong>{total([...session.ends, session.pendingEnd])}</strong>
+                {t('points')}</span
               >{/if}<span class="open-arrow" aria-hidden="true">↗</span>
           </div>
+          <RoundSummary {session} {t} />
           {#if session.scoringFormat === 'beursault'}<BeursaultSummary
               ends={session.ends}
               {t}

@@ -50,6 +50,7 @@
   <label
     >{t('Equipment setup')}<select
       value={session.setup?.id ?? ''}
+      disabled={session.round === 'progression' && hasScores(session)}
       onchange={(e) => onsetup(e.currentTarget.value)}
       ><option value="">{t('No setup selected')}</option
       >{#each setups as setup}<option value={setup.id}
@@ -75,6 +76,7 @@
         min="0"
         step="1"
         bind:value={session.distance}
+        disabled={session.round === 'progression'}
       /></label
     >
   </div>
@@ -83,7 +85,7 @@
       >{t('Target face')}
       <select
         value={selectedTargetFace(session)}
-        disabled={hasScores(session)}
+        disabled={hasScores(session) || session.round !== 'free'}
         onchange={(event) => {
           selectTargetFace(session, event.currentTarget.value);
           onchange();
@@ -98,14 +100,7 @@
             >{t(face.label)}</option
           >{/each}
       </select>
-    </label><label
-      >{t('Duration (minutes)')}<input
-        type="number"
-        min="0"
-        step="1"
-        bind:value={session.duration}
-      /></label
-    >
+    </label>
   </div>
   {#if hasScores(session)}<p class="field-hint">
       {t('Start a new session to change the target face.')}

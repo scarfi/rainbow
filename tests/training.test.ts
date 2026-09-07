@@ -109,7 +109,7 @@ describe('offline training durability', () => {
       arrows: 3,
     });
     const backup = await db.backup();
-    expect(backup.schemaVersion).toBe(2);
+    expect(backup.schemaVersion).toBe(3);
     expect(backup.sessions).toHaveLength(2);
     expect(
       total(backup.sessions.find((s) => s.status === 'completed')!.ends),

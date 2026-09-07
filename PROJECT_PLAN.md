@@ -4,7 +4,7 @@ Planning baseline: 7 September 2026.
 
 ## Implementation status
 
-The first offline application slice is implemented locally: SvelteKit, Dexie storage, equipment setups, session drafts, notes, standard-face selection (40, 60, 80, and 122 cm), 10-zone scoring, four-point Beursault scoring with honneurs/points/chapelets/noirs, unfinished-end persistence, a training journal, JSON export, and an application-shell service worker. English and French interfaces are included. Automated persistence and cache tests pass; actual device offline verification remains open. Cloud synchronization, authentication, media, and community features are not implemented.
+The first offline application slice is implemented locally: SvelteKit, Dexie storage, equipment setups, session drafts, notes, standard-face selection (40, 60, 80, and 122 cm), 10-zone scoring, four-point Beursault scoring with honneurs/points/chapelets/noirs, unfinished-end persistence, a start/stop timer, a full-viewport shooting interface, Beursault and progression presets, a training journal with a yearly arrow activity calendar and day filtering, JSON export, and an application-shell service worker. English and French interfaces are included. Automated persistence and cache tests pass; actual device offline verification remains open. Cloud synchronization, authentication, media, and community features are not implemented.
 
 The repository is connected to GitHub. Implementation is integrated through feature branches and pull requests. GitHub Actions validates changes and deploys main to GitHub Pages when Pages is enabled. The project owner requested offline development before creating a Supabase project.
 

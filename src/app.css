@@ -875,3 +875,349 @@ textarea {
   border-color: #142b43;
   color: #fff;
 }
+
+/* Range controls use large native buttons and no animation or external assets. */
+.round-settings {
+  display: grid;
+  gap: 14px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+}
+.training-timer {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+}
+.timer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.clock {
+  display: block;
+  font-size: 1.75rem;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+.round-summary {
+  padding: 16px 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.round-summary progress {
+  display: block;
+  width: 100%;
+  height: 9px;
+  margin: 10px 0;
+  accent-color: var(--accent);
+}
+.round-summary p {
+  font-size: 0.85rem;
+}
+.shooting-launch {
+  width: 100%;
+  margin-top: 20px;
+}
+.shooting-view {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: clamp(16px, 3vw, 32px);
+  border: 0;
+  background: #f3f6f9;
+  color: var(--navy);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.shooting-view::backdrop {
+  background: var(--navy);
+}
+.shooting-content {
+  max-width: 760px;
+  margin: 0 auto;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.shooting-content header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.shooting-content header h1 {
+  font-size: 1.5rem;
+  overflow-wrap: anywhere;
+}
+.shooting-content header p {
+  font-size: 0.875rem;
+}
+.shooting-content .training-timer {
+  padding: 8px 0;
+}
+.shooting-content .timer-row {
+  margin-bottom: 0;
+}
+.shooting-score {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 10px;
+}
+.shooting-score > strong {
+  font-size: 3rem;
+  font-variant-numeric: tabular-nums;
+}
+.next-arrow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 0;
+  font-size: 1.1rem;
+}
+.next-arrow > span {
+  font-size: 0.9rem;
+  align-self: center;
+}
+.shooting-pad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.shooting-pad button {
+  min-height: 76px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  touch-action: manipulation;
+  border: 1px solid #bdcddc;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--navy);
+}
+.shooting-pad button:active {
+  background: #c4dcf3;
+}
+.shooting-pad button.gold {
+  background: #ffdf77;
+  border-color: #e4bf51;
+}
+.shooting-pad button.noir {
+  background: #142b43;
+  color: #fff;
+}
+.shooting-pad.beursault-pad {
+  grid-template-columns: repeat(5, 1fr);
+}
+.shooting-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 20px 0;
+}
+.shooting-actions > span {
+  font-size: 0.85rem;
+}
+.shooting-content details {
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+.shooting-content summary {
+  cursor: pointer;
+  min-height: 44px;
+}
+.arrow-history {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  list-style: none;
+  padding: 0;
+  gap: 8px;
+}
+.arrow-history li {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+.arrow-history li > span {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+@media (max-width: 500px) {
+  .shooting-pad {
+    gap: 8px;
+  }
+  .shooting-pad button {
+    min-height: 65px;
+  }
+  .shooting-pad.beursault-pad {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .next-arrow {
+    flex-wrap: wrap;
+  }
+  .shooting-content header .secondary {
+    white-space: normal;
+    max-width: 140px;
+  }
+  .arrow-history {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .shooting-content .round-summary {
+    padding: 8px 0;
+  }
+  .shooting-content .beursault-summary {
+    padding: 8px 0;
+  }
+}
+
+/* Native calendar controls keep the activity view usable without a chart library. */
+.activity-calendar {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 22px;
+  margin-bottom: 30px;
+}
+.activity-calendar .section-title {
+  align-items: flex-start;
+}
+.activity-calendar .section-title p {
+  margin-top: 8px;
+}
+.calendar-scroll {
+  overflow-x: auto;
+  position: relative;
+  padding: 5px 3px;
+}
+.calendar-weeks {
+  display: flex;
+  gap: 4px;
+  width: max-content;
+}
+.calendar-week {
+  display: grid;
+  grid-template-rows: 22px repeat(7, 18px);
+  gap: 4px;
+  width: 18px;
+}
+.calendar-month {
+  font-size: 0.75rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.activity-cell {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  border: 1px solid #dce4eb;
+  background: #edf2f7;
+  padding: 0;
+  flex-shrink: 0;
+}
+.activity-cell[data-level='1'] {
+  background: #bedcf2;
+  border-color: #9ec5e4;
+}
+.activity-cell[data-level='2'] {
+  background: #79b4df;
+  border-color: #6099ca;
+}
+.activity-cell[data-level='3'] {
+  background: #367fba;
+  border-color: #276ba3;
+}
+.activity-cell[data-level='4'] {
+  background: #164870;
+  border-color: #164870;
+}
+.activity-cell.has-session[data-level='0'] {
+  border-color: #6c8dab;
+}
+.activity-cell.selected {
+  outline: 2px solid #d47318;
+  outline-offset: 1px;
+}
+.activity-cell[aria-current='date'] {
+  box-shadow: inset 0 0 0 1px #0e2941;
+}
+.calendar-padding {
+  visibility: hidden;
+}
+.calendar-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.calendar-legend {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.calendar-legend > span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.calendar-legend .activity-cell {
+  width: 12px;
+  height: 12px;
+}
+.calendar-selection {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+.calendar-selection input {
+  width: auto;
+}
+.calendar-selection p {
+  width: 100%;
+  font-size: 0.9rem;
+}
+@media (pointer: coarse) {
+  .calendar-week {
+    grid-template-rows: 22px repeat(7, 24px);
+    width: 24px;
+  }
+  .calendar-week .activity-cell {
+    height: 24px;
+    width: 24px;
+  }
+}
+@media (max-width: 650px) {
+  .activity-calendar {
+    padding: 16px;
+  }
+  .calendar-selection {
+    gap: 10px;
+  }
+  .calendar-selection .secondary {
+    white-space: normal;
+  }
+}
+.calendar-week.weekday-labels {
+  width: 34px;
+  position: sticky;
+  left: 0;
+  background: #fff;
+  z-index: 1;
+  font-size: 0.7rem;
+  color: var(--muted);
+  align-items: center;
+}

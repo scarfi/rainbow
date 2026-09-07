@@ -1,3 +1,4 @@
+import { validateTraining } from './training';
 import Dexie, { type Table } from 'dexie';
 import {
   validateSession,
@@ -43,10 +44,24 @@ export class TrainingDB extends Dexie {
             session.scoringFormat = 'ten-zone';
           }),
       );
+    this.version(4)
+      .stores({ sessions: 'id, date, updatedAt, status', setups: 'id, name' })
+      .upgrade((transaction) =>
+        transaction
+          .table('sessions')
+          .toCollection()
+          .modify((session) => {
+            session.round = 'free';
+            session.progressionLevel = 'White';
+            session.timerStartedAt = null;
+            session.timerElapsedMs = session.duration * 60000;
+          }),
+      );
   }
   async saveSession(input: Session): Promise<Session> {
     const data: Session = JSON.parse(JSON.stringify(input));
     validateSession(data);
+    validateTraining(data);
     return this.transaction('rw', this.sessions, async () => {
       const previous = await this.sessions.get(data.id);
       if ((previous?.revision ?? 0) !== data.revision)
@@ -58,6 +73,17 @@ export class TrainingDB extends Dexie {
         hasScores(previous)
       ) {
         throw new Error('Start a new session to change the target face.');
+      }
+      if (
+        previous &&
+        hasScores(previous) &&
+        (previous.round !== data.round ||
+          previous.progressionLevel !== data.progressionLevel ||
+          (previous.round === 'progression' &&
+            (previous.distance !== data.distance ||
+              previous.setup?.bowType !== data.setup?.bowType)))
+      ) {
+        throw new Error('Start a new session to change the round.');
       }
       data.revision++;
       data.updatedAt = new Date().toISOString();
@@ -82,7 +108,7 @@ export class TrainingDB extends Dexie {
   }
   async backup() {
     return this.transaction('r', this.sessions, this.setups, async () => ({
-      schemaVersion: 2,
+      schemaVersion: 3,
       exportedAt: new Date().toISOString(),
       sessions: await this.sessions.toArray(),
       setups: await this.setups.toArray(),
