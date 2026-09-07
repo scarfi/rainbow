@@ -322,15 +322,6 @@
         ><span aria-hidden="true">↗</span> {t('Equipment')}</button
       >
     </nav>
-    <div class="sidebar-bottom">
-      <span class="tiny-target" aria-hidden="true">◎</span><strong
-        >{t('One arrow at a time.')}</strong
-      >
-      <p>{t('Your practice, your progress.')}</p>
-      <button class="text-button" onclick={exportData} disabled={!loaded}
-        >{t('Export training data ↗')}</button
-      >
-    </div>
   </aside>
   <main>
     <header class="topbar">

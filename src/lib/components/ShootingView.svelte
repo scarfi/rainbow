@@ -73,10 +73,13 @@
       </div>{/if}
     <TrainingTimer {session} {t} {onstart} {onstop} {onmanual} manual={false} />
     <RoundSummary {session} {t} />
-    <div class="shooting-score">
-      <strong>{progress.points}</strong><span>{t('points')}</span>
-    </div>
-    {#if beursault}<BeursaultSummary ends={[scores]} {t} />{/if}
+    {#if beursault}
+      <BeursaultSummary ends={[scores]} {t} />
+    {:else}
+      <div class="shooting-score">
+        <strong>{progress.points}</strong><span>{t('points')}</span>
+      </div>
+    {/if}
     <div class="next-arrow" aria-live="polite">
       {#if progress.complete || session.status === 'completed'}<strong
           >{t(
