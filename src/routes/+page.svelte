@@ -32,7 +32,7 @@
     type Setup,
     type BowType,
   } from '$lib/model';
-  let locale = $state<Locale>('en');
+  let locale = $state<Locale>('fr');
   const t = (key: MessageKey) => translate(locale, key);
   function changeLanguage(value: string) {
     locale = value === 'fr' ? 'fr' : 'en';
@@ -245,11 +245,9 @@
   onMount(() => {
     try {
       const saved = localStorage.getItem('rainbow-language');
-      changeLanguage(
-        saved ?? (navigator.language.startsWith('fr') ? 'fr' : 'en'),
-      );
+      changeLanguage(saved === 'en' ? 'en' : 'fr');
     } catch {
-      changeLanguage(navigator.language.startsWith('fr') ? 'fr' : 'en');
+      changeLanguage('fr');
     }
     online = navigator.onLine;
     const update = () => {

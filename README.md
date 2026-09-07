@@ -17,7 +17,7 @@ A lightweight archery training journal for desktop and mobile, with English and 
 - Preserve the equipment configuration used in each session.
 - Search the journal and review completed-session totals.
 - View a yearly arrow activity calendar and select a day to filter the journal.
-- Switch between English and French. The preference stays on the device.
+- Switch between English and French. French is the default; a saved language preference takes priority and stays on the device.
 - Export a JSON backup, including the currently open editor.
 - Load the production application offline after its initial cache is ready.
 
