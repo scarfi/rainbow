@@ -391,9 +391,7 @@
     {#if view === 'training'}
       <section class="page-heading">
         <div>
-          <p class="eyebrow">{t('MAKE EVERY ARROW COUNT')}</p>
           <h1>{t('My training')}</h1>
-          <p>{t('A little practice. A clearer picture of your progress.')}</p>
         </div>
         <button class="primary" onclick={start} disabled={!loaded || saving}
           >{t('＋ Log a session')}</button

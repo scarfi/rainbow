@@ -66,9 +66,7 @@ export const fr: Record<MessageKey, string> = {
   'Your work needs attention.': 'Une action est nécessaire.',
   'Export a backup': 'Exporter une sauvegarde',
   'Retry save': 'Réessayer',
-  'MAKE EVERY ARROW COUNT': 'CHAQUE FLÈCHE COMPTE',
-  'A little practice. A clearer picture of your progress.':
-    'Entraînez-vous et suivez vos progrès.',
+
   '＋ Log a session': '＋ Ajouter une séance',
   'Completed sessions': 'Séances terminées',
   sessions: 'séances',

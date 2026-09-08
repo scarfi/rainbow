@@ -64,9 +64,7 @@ export const en = {
   'Your work needs attention.': 'Your work needs attention.',
   'Export a backup': 'Export a backup',
   'Retry save': 'Retry save',
-  'MAKE EVERY ARROW COUNT': 'MAKE EVERY ARROW COUNT',
-  'A little practice. A clearer picture of your progress.':
-    'A little practice. A clearer picture of your progress.',
+
   '＋ Log a session': '＋ Log a session',
   'Completed sessions': 'Completed sessions',
   sessions: 'sessions',
