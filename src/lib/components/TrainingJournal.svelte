@@ -1,4 +1,6 @@
 <script lang="ts">
+  import SessionExport from './SessionExport.svelte';
+  import type { ExportFormat } from '$lib/exports';
   import RoundSummary from './RoundSummary.svelte';
   import BeursaultSummary from './BeursaultSummary.svelte';
   import { total, type Session } from '$lib/model';
@@ -14,6 +16,7 @@
     dateLabel,
     onopen,
     onstart,
+    onexport,
   }: {
     sessions: Session[];
     filtered: Session[];
@@ -25,6 +28,7 @@
     dateLabel: (date: string) => string;
     onopen: (session: Session) => void;
     onstart: () => void;
+    onexport: (format: ExportFormat, wholeDay?: boolean) => void;
   } = $props();
 </script>
 
@@ -32,6 +36,22 @@
   <div class="section-title">
     <h2>{selectedDay ? dateLabel(selectedDay) : t('Training journal')}</h2>
     <span>{filtered.length} {t('entries')}</span>
+  </div>
+  <div class="journal-exports">
+    {#if selectedDay}
+      <SessionExport
+        label="Export this day"
+        {t}
+        disabled={!loaded || !sessions.length}
+        onexport={(format) => onexport(format, true)}
+      />
+    {/if}
+    <SessionExport
+      label="Export matching sessions"
+      {t}
+      disabled={!loaded || !filtered.length}
+      onexport={(format) => onexport(format)}
+    />
   </div>
   <label class="search"
     ><span class="sr-only">{t('Search training')}</span><input

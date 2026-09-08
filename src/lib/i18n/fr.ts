@@ -1,5 +1,59 @@
 import type { MessageKey } from './index';
 export const fr: Record<MessageKey, string> = {
+  'Retry account connection': 'Réessayer la connexion au compte',
+  Account: 'Compte',
+  'Close account': 'Fermer le compte',
+  'Sign in': 'Se connecter',
+  'Create an account': 'Créer un compte',
+  'Reset password': 'Réinitialiser le mot de passe',
+  'Set a new password': 'Définir un nouveau mot de passe',
+  Email: 'Adresse e-mail',
+  Password: 'Mot de passe',
+  'New password': 'Nouveau mot de passe',
+  'Confirm password': 'Confirmer le mot de passe',
+  'Forgot password?': 'Mot de passe oublié ?',
+  'Signed in as': 'Connecté avec',
+  'Sign out on this device': 'Se déconnecter sur cet appareil',
+  'Loading account\u2026': 'Chargement du compte…',
+  'Please wait\u2026': 'Veuillez patienter…',
+  'Local backup': 'Sauvegarde locale',
+  'Download all training and equipment stored in this browser.':
+    'Télécharger tous les entraînements et le matériel enregistrés dans ce navigateur.',
+  'Training stays in this browser. Signing in does not upload it or make it available on another device.':
+    'Les entraînements restent dans ce navigateur. La connexion ne les envoie pas en ligne et ne les rend pas disponibles sur un autre appareil.',
+  'Anyone using this browser profile can access its local training, even after sign-out.':
+    'Toute personne utilisant ce profil de navigateur peut accéder aux entraînements locaux, même après déconnexion.',
+  'Connect to the internet to manage your account. Offline training is still available.':
+    'Connectez-vous à Internet pour gérer votre compte. Les entraînements restent accessibles hors ligne.',
+  'Account access is not configured yet.':
+    'La connexion aux comptes n’est pas encore configurée.',
+  'Email or password is incorrect.':
+    'L’adresse e-mail ou le mot de passe est incorrect.',
+  'Confirm your email before signing in.':
+    'Confirmez votre adresse e-mail avant de vous connecter.',
+  'Choose a stronger, different password.':
+    'Choisissez un mot de passe différent et plus robuste.',
+  'Too many attempts. Please wait before trying again.':
+    'Trop de tentatives. Patientez avant de réessayer.',
+  'This email link has expired or is invalid. Request a new one.':
+    'Ce lien a expiré ou n’est pas valide. Demandez-en un nouveau.',
+  'Account request failed. Check your connection and try again.':
+    'La demande a échoué. Vérifiez votre connexion et réessayez.',
+  'Passwords do not match.': 'Les mots de passe ne correspondent pas.',
+  'Check your email to confirm your account. If you already have an account, sign in or reset your password.':
+    'Consultez vos e-mails pour confirmer votre compte. Si vous avez déjà un compte, connectez-vous ou réinitialisez votre mot de passe.',
+  'If an account exists for this email, you will receive a password reset link.':
+    'Si un compte correspond à cette adresse, vous recevrez un lien de réinitialisation du mot de passe.',
+  'Password updated.': 'Mot de passe mis à jour.',
+  'Use at least 8 characters. Your account may require a stronger password.':
+    'Utilisez au moins 8 caractères. Votre compte peut exiger un mot de passe plus robuste.',
+
+  'Export this session': 'Exporter cette séance',
+  'Export this day': 'Exporter cette journée',
+  'Export matching sessions': 'Exporter les séances affichées',
+  'CSV spreadsheet': 'Tableur CSV',
+  'JSON full details': 'Détails complets JSON',
+
   'rainbow home': 'Accueil rainbow',
   'YOUR PRACTICE': 'VOTRE PRATIQUE',
   'Main navigation': 'Navigation principale',
