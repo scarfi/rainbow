@@ -59,7 +59,6 @@ export const fr: Record<MessageKey, string> = {
   'Main navigation': 'Navigation principale',
   'My training': 'Mon entraînement',
   Equipment: 'Matériel',
-  'Personal training journal': 'Journal personnel d’entraînement',
   Online: 'En ligne',
   Offline: 'Hors ligne',
   'Offline ready': 'Disponible hors ligne',

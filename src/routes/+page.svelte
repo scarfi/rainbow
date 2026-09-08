@@ -355,7 +355,7 @@
             >Français</option
           ></select
         ></label
-      ><span>{t('Personal training journal')}</span>
+      >
       <div class="connection">
         <span class:offline={!online} class="status-dot"></span>{t(
           online ? 'Online' : 'Offline',

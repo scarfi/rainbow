@@ -57,7 +57,6 @@ export const en = {
   'Main navigation': 'Main navigation',
   'My training': 'My training',
   Equipment: 'Equipment',
-  'Personal training journal': 'Personal training journal',
   Online: 'Online',
   Offline: 'Offline',
   'Offline ready': 'Offline ready',
