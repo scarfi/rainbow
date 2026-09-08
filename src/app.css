@@ -795,9 +795,6 @@ textarea {
   width: auto;
   background: transparent;
 }
-.mobile-export {
-  display: none;
-}
 @media (max-width: 850px) {
   .topbar > span {
     display: none;
@@ -808,10 +805,6 @@ textarea {
     flex-wrap: wrap;
     padding: 10px 0;
     gap: 10px;
-  }
-  .mobile-export {
-    display: block;
-    font-size: 0.8rem;
   }
   .connection {
     order: 3;
@@ -1194,4 +1187,52 @@ textarea {
   font-size: 0.7rem;
   color: var(--muted);
   align-items: center;
+}
+
+.journal-exports,
+.export-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.session-export {
+  margin: 12px 0;
+}
+.session-export summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.export-options {
+  margin-top: 10px;
+}
+
+.account-panel {
+  background: white;
+  border: 1px solid var(--line, #dbe2e9);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 16px 0;
+}
+.account-form {
+  max-width: 400px;
+}
+.account-form fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+.account-form label {
+  display: grid;
+  gap: 6px;
+}
+.account-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 16px 0;
+}
+.account-panel details {
+  margin-top: 20px;
 }

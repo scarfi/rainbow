@@ -18,10 +18,12 @@ A lightweight archery training journal for desktop and mobile, with English and 
 - Search the journal and review completed-session totals.
 - View a yearly arrow activity calendar and select a day to filter the journal.
 - Switch between English and French. French is the default; a saved language preference takes priority and stays on the device.
-- Export a JSON backup, including the currently open editor.
+- Export individual sessions, selected days, and filtered journal results as CSV or JSON, including current editor changes.
+- Access email/password sign-in, registration, and password recovery when Supabase is configured.
+- Export a full JSON backup from Account, including the currently open editor.
 - Load the production application offline after its initial cache is ready.
 
-Cloud accounts, synchronization, media attachments, and community features are not implemented yet. Data belongs to the current browser profile and origin. Backup export is implemented; a backup import interface is not yet available. No real training data is preloaded.
+The account interface and Supabase authentication integration are implemented. The local project connection is configured and its public authentication settings are verified. Email delivery, redirect settings, and end-to-end login still need verification. Cloud synchronization, media attachments, and community features are not implemented yet. Data belongs to the current browser profile and origin. Backup export is implemented; a backup import interface is not yet available. No real training data is preloaded.
 
 ## Run locally
 
@@ -132,3 +134,25 @@ The calendar groups saved sessions by their recorded training date, including dr
 Intensity buckets are fixed at 0, 1-29, 30-59, 60-99, and 100+ arrows. Select a year or use the date picker to browse history. Choosing a day clears any text search and shows every session on that date; text search can then narrow those results. Show all sessions clears the day filter. Opening a new session also clears the filter. Calendar navigation does not discard an open editor.
 
 The calendar uses native buttons with arrow-key navigation and a date-picker alternative on touch screens. Date calculations preserve the entered calendar date across time zones and include leap days. No chart library or database migration is required. Aggregation and calendar geometry live in `src/lib/activity.ts`.
+
+## Contextual exports
+
+Open a session and choose Export this session for CSV or JSON. In the journal, Export this day includes every session on the selected date, regardless of the search text. Export matching sessions applies both the selected day and the current search. The current editor replaces its saved version before export filtering, so unfinished scores and unsaved edits are included without duplication. CSV includes scores, Beursault totals, duration at export time, equipment name, and notes. JSON preserves every session field, including the equipment snapshot and running timer state. CSV headers and stored enum values are stable English identifiers; exported notes retain their original language. Spreadsheet formulas in user text are neutralized.
+
+Full backup remains under Account > Local backup and in save-error recovery. Exports contain personal data and should be shared deliberately. Downloading does not save pending edits or acknowledge a database write. Import is still a separate feature.
+
+## Supabase account setup
+
+Authentication is optional for the local training journal. It uses email/password sign-in, signup confirmation, password recovery, persisted sessions, and sign-out for the current browser. The SDK loads separately from the training modules. Signing in does not migrate, upload, or claim ownership of local training. Local records belong to this browser profile and remain accessible after sign-out or account changes. Account-scoped storage and an explicit local-data migration step are required before implementing synchronization.
+
+1. Copy `.env.example` to ignored `.env.local` and supply `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. Only a modern `sb_publishable_` key is accepted. Never provide a secret, service-role key, database password, or management token. Restart the dev server after changing environment values.
+2. For GitHub Pages, set repository Actions variables with those same names. These are browser-public configuration values, injected at build time. A new build is required after changing them. Missing or invalid configuration disables account access while training remains available.
+3. In Supabase Auth, enable Email/password and retain email confirmation. Set Site URL to `https://scarfi.github.io/rainbow/`. Allow that exact redirect URL plus `http://127.0.0.1:5173/` for development. If testing a different preview origin or the Pages base path locally, add that exact callback too. Signup and recovery return to the existing app root, so no server callback route is required on Pages.
+4. Verify email delivery before inviting users. Supabase's default SMTP service is restricted to authorized team addresses and is rate limited; public signup needs a suitable SMTP provider. Do not disable confirmation as a workaround. Ask the project owner before enabling paid services or changing anything that could increase costs.
+5. Complete the account checklist in `docs/OFFLINE_TESTING.md` using a test account. The project accepts the supplied publishable key; its public settings report email authentication and signup enabled, with email confirmation required. Live email delivery, redirect configuration, and real-device behavior remain unverified.
+
+No database tables, storage buckets, billing settings, or cloud synchronization are added by this change. Passwords are transient form values; Supabase manages tokens in browser auth storage. The service worker only caches the static app shell and never caches authentication API responses.
+
+Implementation: `src/lib/exports.ts` handles selection and serialization. `src/lib/auth/` handles client configuration, provider actions, and translated errors. `AccountPanel.svelte` manages account UI and session/recovery lifecycle.
+
+References: [Supabase password authentication](https://supabase.com/docs/guides/auth/passwords), [redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls), [SMTP setup](https://supabase.com/docs/guides/auth/auth-smtp).

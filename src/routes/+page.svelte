@@ -1,4 +1,11 @@
 <script lang="ts">
+  import AccountPanel from '$lib/components/AccountPanel.svelte';
+  import SessionExport from '$lib/components/SessionExport.svelte';
+  import {
+    downloadSessions,
+    exportSelection,
+    type ExportFormat,
+  } from '$lib/exports';
   import ActivityCalendar from '$lib/components/ActivityCalendar.svelte';
   import { sessionsOnDay } from '$lib/activity';
   import { base } from '$app/paths';
@@ -44,6 +51,7 @@
     }
   }
   let shooting = $state(false);
+  let accountOpen = $state(false);
   let view = $state<'training' | 'equipment'>('training');
   let sessions = $state<Session[]>([]),
     setups = $state<Setup[]>([]);
@@ -112,6 +120,19 @@
           'rainbow-recovered-draft.json',
         );
     }
+  }
+  function exportJournal(format: ExportFormat, wholeDay = false) {
+    const selection = exportSelection(
+      sessions,
+      draft,
+      selectedDay,
+      wholeDay ? '' : query,
+    );
+    downloadSessions(selection, format, `rainbow-${selectedDay ?? 'journal'}`);
+  }
+  function exportSession(format: ExportFormat) {
+    if (draft)
+      downloadSessions([draft], format, `rainbow-session-${draft.date}`);
   }
   function changed() {
     dirty = true;
@@ -346,11 +367,19 @@
         >
       </div>
       <button
-        class="text-button mobile-export"
-        onclick={exportData}
-        disabled={!loaded}>{t('Export a backup')}</button
+        class="text-button"
+        aria-expanded={accountOpen}
+        aria-controls="account-panel"
+        onclick={() => (accountOpen = !accountOpen)}>{t('Account')}</button
       >
     </header>
+    <AccountPanel
+      {t}
+      {online}
+      {loaded}
+      bind:open={accountOpen}
+      onbackup={exportData}
+    />
     {#if error}<div class="error" role="alert">
         <strong>{t('Your work needs attention.')}</strong>
         {t(error as MessageKey)}
@@ -408,6 +437,7 @@
           {dateLabel}
           onopen={openSession}
           onstart={start}
+          onexport={exportJournal}
         />
         {#if draft}
           <section class="editor" aria-label={t('Session editor')}>
@@ -433,6 +463,11 @@
                 ? t(saveLabel as MessageKey)
                 : t('Ready to save')}
             </div>
+            <SessionExport
+              label="Export this session"
+              {t}
+              onexport={exportSession}
+            />
             <RoundSettings bind:session={draft} {t} onchange={changed} />
             <TrainingTimer
               session={draft}

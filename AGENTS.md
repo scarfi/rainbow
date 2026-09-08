@@ -57,6 +57,11 @@ Read README.md and PROJECT_PLAN.md before expanding scope. Preserve the agreed S
 - Review staged changes for secrets before every commit. Ensure files containing credentials are ignored before staging them.
 - If a secret is accidentally committed, stop sharing it, notify the owner, and arrange revocation or rotation. Deleting it in a later commit does not remove it from Git history.
 
+## Supabase changes
+
+- Ask the project owner before any Supabase configuration or resource change that could increase costs. Do not upgrade plans or enable paid services without approval.
+- Authentication does not imply synchronization. Keep the local journal explicitly device-local until account isolation and an approved migration flow are implemented.
+
 ## Verification and delivery
 
 - Run npm run check, npm test, npm run build, npm run size, and npm run format:check for relevant implementation changes.

@@ -47,3 +47,23 @@ Development and production-preview ports are different storage origins. A journa
 - Change a session's date or arrow count and verify that the calendar updates after the local save.
 - Browse past years, leap days, and the date picker in English and French.
 - Navigate days with the arrow keys and select with Enter or Space. Verify mobile horizontal scrolling and the date-picker alternative.
+
+## Contextual exports
+
+- Export an open session as JSON and CSV while offline. Check notes with accents, commas, quotes, and newlines, plus pending arrow scores.
+- Select a day with multiple sessions. Apply a search; Export this day must include all that day's sessions and Export matching sessions only the matches.
+- Change the editor date before a save completes. Confirm the exported day reflects the edited date and contains no duplicate session.
+- Verify Beursault totals include pending scores. Open the CSV in a spreadsheet and check that a title beginning with `=` appears as text.
+- Confirm the full backup is available under Account and that error recovery still exports the current draft.
+
+## Accounts (configured Supabase project and test account required)
+
+- Start without configuration: training and exports remain available; Account explains that access is not configured.
+- Sign up, follow the confirmation link, sign out, and sign in. Confirm the redirect returns to `/rainbow/` in production and `/` in development.
+- Try a wrong password, an unconfirmed email, and rate-limited requests. Errors must be translated and must not contain raw provider responses.
+- Request a password reset, follow the email link, choose a new password, and sign in with it. Reload the recovery form before submitting and ensure it remains available. An expired link must show a recovery error. URL tokens must be removed after processing.
+- Reload after sign-in, then sign out from another tab. Account status must update. Check that sign-out does not delete or upload the local journal and that the interface explains local records remain accessible.
+- Open the cached app offline, record arrows, export a session, and reconnect. Account controls should be disabled offline while training remains fully usable.
+- Test denied browser storage and failed auth network requests. Training must remain accessible, and no false authentication success should be shown.
+- Use browser tools to confirm no auth API responses or credentials enter Cache Storage, exported training, or logs.
+- Repeat in English and French on desktop and mobile. Test keyboard access to export controls and account forms.

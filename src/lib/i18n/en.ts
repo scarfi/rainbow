@@ -1,4 +1,57 @@
 export const en = {
+  'Retry account connection': 'Retry account connection',
+  Account: 'Account',
+  'Close account': 'Close account',
+  'Sign in': 'Sign in',
+  'Create an account': 'Create an account',
+  'Reset password': 'Reset password',
+  'Set a new password': 'Set a new password',
+  Email: 'Email',
+  Password: 'Password',
+  'New password': 'New password',
+  'Confirm password': 'Confirm password',
+  'Forgot password?': 'Forgot password?',
+  'Signed in as': 'Signed in as',
+  'Sign out on this device': 'Sign out on this device',
+  'Loading account\u2026': 'Loading account…',
+  'Please wait\u2026': 'Please wait…',
+  'Local backup': 'Local backup',
+  'Download all training and equipment stored in this browser.':
+    'Download all training and equipment stored in this browser.',
+  'Training stays in this browser. Signing in does not upload it or make it available on another device.':
+    'Training stays in this browser. Signing in does not upload it or make it available on another device.',
+  'Anyone using this browser profile can access its local training, even after sign-out.':
+    'Anyone using this browser profile can access its local training, even after sign-out.',
+  'Connect to the internet to manage your account. Offline training is still available.':
+    'Connect to the internet to manage your account. Offline training is still available.',
+  'Account access is not configured yet.':
+    'Account access is not configured yet.',
+  'Email or password is incorrect.': 'Email or password is incorrect.',
+  'Confirm your email before signing in.':
+    'Confirm your email before signing in.',
+  'Choose a stronger, different password.':
+    'Choose a stronger, different password.',
+  'Too many attempts. Please wait before trying again.':
+    'Too many attempts. Please wait before trying again.',
+  'This email link has expired or is invalid. Request a new one.':
+    'This email link has expired or is invalid. Request a new one.',
+  'Account request failed. Check your connection and try again.':
+    'Account request failed. Check your connection and try again.',
+  'Passwords do not match.': 'Passwords do not match.',
+  'Check your email to confirm your account. If you already have an account, sign in or reset your password.':
+    'Check your email to confirm your account. If you already have an account, sign in or reset your password.',
+  'If an account exists for this email, you will receive a password reset link.':
+    'If an account exists for this email, you will receive a password reset link.',
+  'Password updated.': 'Password updated.',
+  'Use at least 8 characters. Your account may require a stronger password.':
+    'Use at least 8 characters. Your account may require a stronger password.',
+
+  'Export this session': 'Export this session',
+  'Export this day': 'Export this day',
+  'Export matching sessions': 'Export matching sessions',
+  'CSV spreadsheet': 'CSV spreadsheet',
+  'JSON full details': 'JSON full details',
+
   'rainbow home': 'rainbow home',
   'YOUR PRACTICE': 'YOUR PRACTICE',
   'Main navigation': 'Main navigation',
