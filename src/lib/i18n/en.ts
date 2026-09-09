@@ -1,4 +1,29 @@
 export const en = {
+  'Signed-in training and equipment sync to your account. Offline edits upload when you reconnect.':
+    'Signed-in training and equipment sync to your account. Offline edits upload when you reconnect.',
+  'Signing out hides your account journal. Unsynced changes stay on this device for your next sign-in.':
+    'Signing out hides your account journal. Unsynced changes stay on this device for your next sign-in.',
+  'Opening account journal\u2026': 'Opening account journal…',
+  'Changes waiting to sync.': 'Changes waiting to sync.',
+  'Synced to your account': 'Synced to your account',
+  'Syncing\u2026': 'Syncing…',
+  'Sync now': 'Sync now',
+  pending: 'pending',
+  'Conflicting edits need review.': 'Conflicting edits need review.',
+  'Offline. Changes will sync when connected.':
+    'Offline. Changes will sync when connected.',
+  'Sign in again to sync.': 'Sign in again to sync.',
+  'Sync failed. Your changes are saved on this device.':
+    'Sync failed. Your changes are saved on this device.',
+  'Another device changed these records. Keep both versions to preserve all edits.':
+    'Another device changed these records. Keep both versions to preserve all edits.',
+  'Keep both versions': 'Keep both versions',
+  'Conflict copy': 'Conflict copy',
+  'Guest journal. Sign in to start a separate journal that syncs across devices.':
+    'Guest journal. Sign in to start a separate journal that syncs across devices.',
+  'Export a backup to keep another copy of this journal.':
+    'Export a backup to keep another copy of this journal.',
+
   'Retry account connection': 'Retry account connection',
   Account: 'Account',
   'Close account': 'Close account',

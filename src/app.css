@@ -1236,3 +1236,18 @@ textarea {
 .account-panel details {
   margin-top: 20px;
 }
+
+.sync-status {
+  margin: 16px 0;
+  font-size: 0.9rem;
+}
+.sync-status > button {
+  margin-left: 12px;
+}
+.sync-conflict {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 10px 0;
+}

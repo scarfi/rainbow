@@ -52,6 +52,8 @@ Read README.md and PROJECT_PLAN.md before expanding scope. Preserve the agreed S
 
 ## Secrets and credentials
 
+- Never commit the Connectly client key, even though the vendor describes it as public. Configure it through an ignored environment file.
+
 - Never commit private keys, passwords, API secrets, access tokens, service-role keys, or other credentials to Git, including in code, configuration, fixtures, documentation, or generated files.
 - Keep secrets in ignored local environment files or an appropriate secret manager. Use placeholders in committed examples.
 - Review staged changes for secrets before every commit. Ensure files containing credentials are ignored before staging them.
@@ -59,8 +61,10 @@ Read README.md and PROJECT_PLAN.md before expanding scope. Preserve the agreed S
 
 ## Supabase changes
 
+- Provide SQL and concise dashboard instructions for the owner to run. Do not automate the Supabase dashboard unless explicitly requested.
+
 - Ask the project owner before any Supabase configuration or resource change that could increase costs. Do not upgrade plans or enable paid services without approval.
-- Authentication does not imply synchronization. Keep the local journal explicitly device-local until account isolation and an approved migration flow are implemented.
+- Keep guest, legacy, and account journals isolated. Do not import guest or legacy data into an account without explicit user authorization. The owner approved starting fresh for the initial synchronization release.
 
 ## Verification and delivery
 

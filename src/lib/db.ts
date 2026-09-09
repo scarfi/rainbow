@@ -1,3 +1,4 @@
+import { recordKey, type RecordKind, type SyncState } from './sync/types';
 import { validateTraining } from './training';
 import Dexie, { type Table } from 'dexie';
 import {
@@ -15,6 +16,7 @@ export class ConflictError extends Error {
   }
 }
 export class TrainingDB extends Dexie {
+  syncState!: Table<SyncState, string>;
   sessions!: Table<Session, string>;
   setups!: Table<Setup, string>;
   constructor(name = 'rainbow-training') {
@@ -57,12 +59,29 @@ export class TrainingDB extends Dexie {
             session.timerElapsedMs = session.duration * 60000;
           }),
       );
+    this.version(5).stores({
+      sessions: 'id, date, updatedAt, status',
+      setups: 'id, name',
+      syncState: 'key',
+    });
+  }
+  private async queue(kind: RecordKind, id: string) {
+    const key = recordKey(kind, id);
+    const state = await this.syncState.get(key);
+    await this.syncState.put({
+      ...state,
+      key,
+      kind,
+      id,
+      version: state?.version ?? 0,
+      dirty: true,
+    });
   }
   async saveSession(input: Session): Promise<Session> {
     const data: Session = JSON.parse(JSON.stringify(input));
     validateSession(data);
     validateTraining(data);
-    return this.transaction('rw', this.sessions, async () => {
+    return this.transaction('rw', this.sessions, this.syncState, async () => {
       const previous = await this.sessions.get(data.id);
       if ((previous?.revision ?? 0) !== data.revision)
         throw new ConflictError();
@@ -88,6 +107,7 @@ export class TrainingDB extends Dexie {
       data.revision++;
       data.updatedAt = new Date().toISOString();
       await this.sessions.put(data);
+      await this.queue('session', data.id);
       return data;
     });
   }
@@ -96,13 +116,14 @@ export class TrainingDB extends Dexie {
     data.name = data.name.trim();
     if (!data.name || !bowTypes.includes(data.bowType))
       throw new Error('Give your setup a name and bow type.');
-    return this.transaction('rw', this.setups, async () => {
+    return this.transaction('rw', this.setups, this.syncState, async () => {
       const previous = await this.setups.get(data.id);
       if ((previous?.revision ?? 0) !== data.revision)
         throw new ConflictError();
       data.revision++;
       data.updatedAt = new Date().toISOString();
       await this.setups.put(data);
+      await this.queue('setup', data.id);
       return data;
     });
   }

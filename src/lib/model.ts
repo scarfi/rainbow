@@ -2,6 +2,7 @@ import type { RoundType, ProgressionLevel } from './training';
 export const bowTypes = ['Recurve', 'Compound', 'Barebow'] as const;
 export type BowType = (typeof bowTypes)[number];
 export type Setup = {
+  conflictOf?: string;
   id: string;
   name: string;
   bowType: BowType;
@@ -10,6 +11,7 @@ export type Setup = {
   revision: number;
 };
 export type Session = {
+  conflictOf?: string;
   id: string;
   date: string;
   title: string;
