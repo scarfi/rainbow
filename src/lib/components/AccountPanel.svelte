@@ -16,12 +16,14 @@
     open = $bindable(false),
     onbackup,
     loaded,
+    onaccount,
   }: {
     t: (key: MessageKey) => string;
     online: boolean;
     open?: boolean;
     onbackup: () => void;
     loaded: boolean;
+    onaccount: (userId: string | null) => void;
   } = $props();
   let mode = $state<AccountMode>('signin');
   let session = $state<Session | null>(null);
@@ -63,6 +65,7 @@
   }
   function applySession(value: Session | null) {
     session = value;
+    queueMicrotask(() => onaccount(value?.user.id ?? null));
     if (!value) {
       rememberRecovery(null);
       if (mode === 'password') mode = 'signin';
@@ -71,7 +74,10 @@
   let disposed = false;
   let unsubscribe: (() => void) | undefined;
   async function initialize() {
-    if (!configuration) return;
+    if (!configuration) {
+      onaccount(null);
+      return;
+    }
     loading = true;
     error = null;
     unsubscribe?.();
@@ -131,7 +137,10 @@
           '',
           `${location.pathname}${location.search}`,
         );
-      if (!disposed) loading = false;
+      if (!disposed) {
+        loading = false;
+        onaccount(session?.user.id ?? null);
+      }
     }
   }
   onMount(() => {
@@ -213,12 +222,12 @@
   </div>
   <p>
     {t(
-      'Training stays in this browser. Signing in does not upload it or make it available on another device.',
+      'Signed-in training and equipment sync to your account. Offline edits upload when you reconnect.',
     )}
   </p>
   <p class="field-hint">
     {t(
-      'Anyone using this browser profile can access its local training, even after sign-out.',
+      'Signing out hides your account journal. Unsynced changes stay on this device for your next sign-in.',
     )}
   </p>
   {#if !online}<p role="status">

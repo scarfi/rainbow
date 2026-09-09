@@ -62,8 +62,19 @@ Development and production-preview ports are different storage origins. A journa
 - Sign up, follow the confirmation link, sign out, and sign in. Confirm the redirect returns to `/rainbow/` in production and `/` in development.
 - Try a wrong password, an unconfirmed email, and rate-limited requests. Errors must be translated and must not contain raw provider responses.
 - Request a password reset, follow the email link, choose a new password, and sign in with it. Reload the recovery form before submitting and ensure it remains available. An expired link must show a recovery error. URL tokens must be removed after processing.
-- Reload after sign-in, then sign out from another tab. Account status must update. Check that sign-out does not delete or upload the local journal and that the interface explains local records remain accessible.
+- Reload after sign-in, then sign out from another tab. Account status must update. Check that sign-out hides the account journal, preserves its pending changes, and shows the separate guest journal.
 - Open the cached app offline, record arrows, export a session, and reconnect. Account controls should be disabled offline while training remains fully usable.
 - Test denied browser storage and failed auth network requests. Training must remain accessible, and no false authentication success should be shown.
 - Use browser tools to confirm no auth API responses or credentials enter Cache Storage, exported training, or logs.
 - Repeat in English and French on desktop and mobile. Test keyboard access to export controls and account forms.
+
+## Two-device synchronization
+
+- Sign into the same account on desktop and phone. Start with the new account journal; legacy local records are intentionally not imported.
+- Save a setup and a scored training session on desktop. Wait for Synced to your account. Open the phone journal or tap Sync now; compare setup details, notes, scores, timer, and dates.
+- Disconnect the phone, edit a session, reload offline, then reconnect. Verify the pending count clears only after upload and desktop receives the edit when focused or manually synchronized.
+- Edit the same session on both devices before syncing. Verify a conflict is reported, neither version disappears, and Keep both versions produces two records with both sets of notes and scores on both devices.
+- Sign out during a slow upload and sign into another account. Confirm no previous account records appear and no queued writes are attributed to the new account. Sign back in and confirm pending work resumes.
+- Expire authentication or interrupt a response after upload. Verify retries do not duplicate sessions and local data remains available.
+- Check anonymous API reads and writes fail. Under an authenticated account, verify only its rows are visible and direct table writes are denied.
+- Confirm the service worker caches no Supabase responses or auth tokens. No paid services or plan changes are needed for these checks.

@@ -1,5 +1,31 @@
 import type { MessageKey } from './index';
 export const fr: Record<MessageKey, string> = {
+  'Signed-in training and equipment sync to your account. Offline edits upload when you reconnect.':
+    'Les entraînements et le matériel de votre compte sont synchronisés. Les modifications hors ligne sont envoyées à la reconnexion.',
+  'Signing out hides your account journal. Unsynced changes stay on this device for your next sign-in.':
+    'La déconnexion masque votre journal. Les modifications non synchronisées restent sur cet appareil jusqu’à votre prochaine connexion.',
+  'Opening account journal\u2026': 'Ouverture du journal du compte…',
+  'Changes waiting to sync.': 'Modifications en attente de synchronisation.',
+  'Synced to your account': 'Synchronisé avec votre compte',
+  'Syncing\u2026': 'Synchronisation…',
+  'Sync now': 'Synchroniser',
+  pending: 'en attente',
+  'Conflicting edits need review.':
+    'Des modifications en conflit doivent être examinées.',
+  'Offline. Changes will sync when connected.':
+    'Hors ligne. Les modifications seront synchronisées à la reconnexion.',
+  'Sign in again to sync.': 'Reconnectez-vous pour synchroniser.',
+  'Sync failed. Your changes are saved on this device.':
+    'La synchronisation a échoué. Vos modifications sont enregistrées sur cet appareil.',
+  'Another device changed these records. Keep both versions to preserve all edits.':
+    'Un autre appareil a modifié ces données. Conservez les deux versions pour garder toutes les modifications.',
+  'Keep both versions': 'Conserver les deux versions',
+  'Conflict copy': 'Copie de conflit',
+  'Guest journal. Sign in to start a separate journal that syncs across devices.':
+    'Journal invité. Connectez-vous pour utiliser un journal distinct synchronisé entre vos appareils.',
+  'Export a backup to keep another copy of this journal.':
+    'Exportez une sauvegarde pour conserver une autre copie de ce journal.',
+
   'Retry account connection': 'Réessayer la connexion au compte',
   Account: 'Compte',
   'Close account': 'Fermer le compte',
