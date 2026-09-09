@@ -23,7 +23,7 @@ A lightweight archery training journal for desktop and mobile, with English and 
 - Export a full JSON backup from Account, including the currently open editor.
 - Load the production application offline after its initial cache is ready.
 
-The account interface and Supabase authentication integration are implemented. The local project connection is configured and its public authentication settings are verified. Email delivery, redirect settings, and end-to-end login still need verification. Cloud synchronization, media attachments, and community features are not implemented yet. Data belongs to the current browser profile and origin. Backup export is implemented; a backup import interface is not yet available. No real training data is preloaded.
+The account interface and Supabase authentication integration are implemented. The local project connection is configured and its public authentication settings are verified. Email delivery, redirect settings, and end-to-end login still need verification. Account synchronization is implemented. The owner confirmed the production database migration succeeded on 2026-09-09; real-device synchronization verification remains open. Media attachments and community features are not implemented. Guest data belongs to this browser; signed-in journals are isolated by project and account. Backup export is implemented; a backup import interface is not yet available. No real training data is preloaded.
 
 ## Run locally
 
@@ -43,7 +43,7 @@ npm run preview
 
 Open the URL printed by the command. Wait for “Offline ready” before disconnecting. Keep using the same origin and port: changing them creates a separate browser storage area. Localhost works for desktop development; a phone visiting another device's HTTP address needs HTTPS for service-worker support.
 
-Browser storage is subject to quotas, clearing, and eviction. The app requests persistent storage when a session is started, but the browser may decline. Export backups until cloud synchronization is available.
+Browser storage is subject to quotas, clearing, and eviction. The app requests persistent storage when a session is started, but the browser may decline. Export backups for an additional copy, especially when changes are waiting to sync.
 
 ## Verification
 
@@ -107,7 +107,7 @@ BASE_PATH=/rainbow npm run preview
 
 Open `/rainbow/` on the preview origin. Icons, the manifest, navigation, and the service worker honor the deployment path. The installed app stays within that path. Service-worker caches are isolated by deployment path.
 
-The deployed site uses a different browser origin from localhost. Local training does not automatically transfer to it; export a backup before moving away from your local journal. The application currently has no account synchronization or backup import interface.
+The deployed site uses a different browser origin from localhost. Guest training does not automatically transfer. Signed-in training can sync between origins and devices using the same Supabase account once the sync migration and app are deployed. A backup import interface is not yet available.
 
 All future changes must start on a dedicated Git branch and reach main through a pull request. See AGENTS.md.
 
@@ -143,7 +143,7 @@ Full backup remains under Account > Local backup and in save-error recovery. Exp
 
 ## Supabase account setup
 
-Authentication is optional for the local training journal. It uses email/password sign-in, signup confirmation, password recovery, persisted sessions, and sign-out for the current browser. The SDK loads separately from the training modules. Signing in does not migrate, upload, or claim ownership of local training. Local records belong to this browser profile and remain accessible after sign-out or account changes. Account-scoped storage and an explicit local-data migration step are required before implementing synchronization.
+Authentication is optional for the local training journal. It uses email/password sign-in, signup confirmation, password recovery, persisted sessions, and sign-out for the current browser. The SDK loads separately from the training modules. Signing in opens a separate account journal. Its training and equipment are saved locally first, then synchronized. Signing out hides that journal and returns to a separate guest journal. Pending changes stay in the account cache for its next sign-in. The pre-sync journal is not imported, as requested by the project owner.
 
 1. Copy `.env.example` to ignored `.env.local` and supply `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. Only a modern `sb_publishable_` key is accepted. Never provide a secret, service-role key, database password, or management token. Restart the dev server after changing environment values.
 2. For GitHub Pages, set repository Actions variables with those same names. These are browser-public configuration values, injected at build time. A new build is required after changing them. Missing or invalid configuration disables account access while training remains available.
@@ -151,8 +151,20 @@ Authentication is optional for the local training journal. It uses email/passwor
 4. Verify email delivery before inviting users. Supabase's default SMTP service is restricted to authorized team addresses and is rate limited; public signup needs a suitable SMTP provider. Do not disable confirmation as a workaround. Ask the project owner before enabling paid services or changing anything that could increase costs.
 5. Complete the account checklist in `docs/OFFLINE_TESTING.md` using a test account. The project accepts the supplied publishable key; its public settings report email authentication and signup enabled, with email confirmation required. Live email delivery, redirect configuration, and real-device behavior remain unverified.
 
-No database tables, storage buckets, billing settings, or cloud synchronization are added by this change. Passwords are transient form values; Supabase manages tokens in browser auth storage. The service worker only caches the static app shell and never caches authentication API responses.
+Synchronization uses one row-level-secured table and one version-checked RPC from the migration below. No storage buckets, paid services, or billing settings are changed. Passwords are transient form values; Supabase manages tokens in browser auth storage. The service worker only caches the static app shell and never caches authentication API responses.
 
 Implementation: `src/lib/exports.ts` handles selection and serialization. `src/lib/auth/` handles client configuration, provider actions, and translated errors. `AccountPanel.svelte` manages account UI and session/recovery lifecycle.
 
 References: [Supabase password authentication](https://supabase.com/docs/guides/auth/passwords), [redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls), [SMTP setup](https://supabase.com/docs/guides/auth/auth-smtp).
+
+## Account synchronization
+
+Apply `supabase/migrations/202609080001_account_sync.sql` once before deploying the sync app. The migration is transaction-wrapped and does not modify existing training or auth users. The table allows authenticated users to read only their own rows. Direct writes are revoked; the RPC derives ownership from the caller and checks the expected cloud version. Test it with `npm test`, which runs the actual SQL against embedded PostgreSQL (PGlite) using two simulated account identities and anonymous requests.
+
+Sessions and equipment saves atomically update their IndexedDB record and durable queue. Each network request has a persisted mutation ID and a cloud-version precondition. Retrying a lost response does not create duplicates. Edits made during uploads remain queued. Simultaneous device edits stop at a visible conflict; Keep both versions preserves the local record under a new ID and restores the remote version at the original ID. Session copies are labelled. Equipment references inside old sessions remain historical snapshots.
+
+Synchronization runs after saves (one-second debounce), on account opening, reconnection, return to the tab, and Sync now. Failed requests retry with backoff while the tab is visible. There is no permanent realtime subscription or closed-app background sync. Pulls read the account journal in pages of 100; no deletion interface is implemented, so missing cloud rows are not treated as deletes. This initial approach favors correctness for small personal journals; incremental synchronization should replace full pulls before large-scale usage.
+
+The account cache is namespaced by project URL and user ID. Every API request captures a token for the expected user; account changes stop the old sync worker and hide the previous journal while local saves finish. Account data is hidden by the app after sign-out but is not encrypted against someone with access to the browser profile or developer tools. Browser eviction can still remove pending changes, so the UI distinguishes local saves from server acknowledgements.
+
+The legacy `rainbow-training` database is left untouched and excluded from synchronization. A fresh guest journal is also separate from every account. No automatic import or deletion of legacy data is performed.

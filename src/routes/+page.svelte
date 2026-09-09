@@ -30,8 +30,106 @@
   } from '$lib/training';
   import TrainingJournal from '$lib/components/TrainingJournal.svelte';
   import { onMount } from 'svelte';
-  import { liveQuery } from 'dexie';
-  import { db } from '$lib/db';
+  import { TrainingDB } from '$lib/db';
+  import { configuration } from '$lib/auth/client';
+  import { watchJournal } from '$lib/sync/journal';
+  import { keepBoth } from '$lib/sync/local';
+  import { accountDatabaseName, type SyncState } from '$lib/sync/types';
+  import SyncStatus from '$lib/components/SyncStatus.svelte';
+  let db = new TrainingDB(
+    accountDatabaseName(configuration?.url ?? 'local', null),
+  );
+  let accountId = $state<string | null>(null);
+  let switching = $state(true);
+  let desiredAccount: string | null | undefined;
+  let journal: ReturnType<typeof watchJournal> | undefined;
+  let syncStatus = $state<MessageKey>('Changes waiting to sync.');
+  let syncing = $state(false);
+  let syncStates = $state<SyncState[]>([]);
+  let boundary = Promise.resolve();
+  const recovery = new Map<string, Session>();
+  function changeAccount(userId: string | null) {
+    if (desiredAccount === userId) return;
+    desiredAccount = userId;
+    switching = true;
+    journal?.stop();
+    boundary = boundary
+      .then(async () => {
+        const old = db;
+        if (!(await flush()) && draft)
+          recovery.set(old.name, JSON.parse(JSON.stringify(draft)));
+        else recovery.delete(old.name);
+        if (desiredAccount !== userId) return;
+        draft = null;
+        dirty = false;
+        currentEnd = [];
+        shooting = false;
+        sessions = [];
+        setups = [];
+        syncStates = [];
+        loaded = false;
+        query = '';
+        selectedDay = null;
+        setupName = '';
+        setupNotes = '';
+        error = '';
+        accountId = userId;
+        db = new TrainingDB(
+          accountDatabaseName(configuration?.url ?? 'local', userId),
+        );
+        old.close();
+        const pendingDraft = recovery.get(db.name);
+        if (pendingDraft) {
+          draft = pendingDraft;
+          dirty = true;
+          currentEnd = [...pendingDraft.pendingEnd];
+        }
+        syncStatus = userId
+          ? 'Changes waiting to sync.'
+          : 'Saved on this device';
+        syncing = false;
+        journal = watchJournal(db, userId, {
+          data: (entries, equipment, states) => {
+            sessions = entries;
+            setups = equipment;
+            syncStates = states;
+            loaded = true;
+            if (draft && !dirty && !saving) {
+              const fresh = entries.find((entry) => entry.id === draft?.id);
+              if (fresh && fresh.revision !== draft.revision) {
+                draft = JSON.parse(JSON.stringify(fresh));
+                currentEnd = [...fresh.pendingEnd];
+              }
+            }
+          },
+          status: (status, active) => {
+            syncStatus = status;
+            syncing = active;
+          },
+          error: (cause) => {
+            error = message(cause);
+          },
+        });
+        switching = false;
+      })
+      .catch((cause) => {
+        sessions = [];
+        setups = [];
+        draft = null;
+        loaded = false;
+        error = message(cause);
+        switching = false;
+      });
+  }
+  async function resolveSync(key: string) {
+    if (switching || !(await flush())) return;
+    try {
+      await keepBoth(db, key);
+      journal?.sync();
+    } catch (cause) {
+      error = message(cause);
+    }
+  }
   import {
     bowTypes,
     newSession,
@@ -171,7 +269,7 @@
     }
   }
   async function start() {
-    if (!(await flush())) return;
+    if (switching || !(await flush()) || switching) return;
     draft = newSession();
     currentEnd = [];
     query = '';
@@ -182,9 +280,10 @@
     void navigator.storage?.persist?.().catch(() => false);
   }
   async function openSession(s: Session) {
-    if (!(await flush())) return;
-    const saved = await db.sessions.get(s.id);
-    if (!saved) return;
+    if (switching || !(await flush()) || switching) return;
+    const source = db;
+    const saved = await source.sessions.get(s.id);
+    if (!saved || source !== db || switching) return;
     draft = JSON.parse(JSON.stringify(saved));
     currentEnd = [...(saved.pendingEnd ?? [])];
     saveLabel = 'Saved on this device';
@@ -212,7 +311,7 @@
     setPendingEnd([]);
   }
   async function finish() {
-    if (!draft) return;
+    if (!draft || switching) return;
     if (currentEnd.length && draft.round !== 'progression') addEnd();
     stopTimer(draft);
     draft.status = 'completed';
@@ -230,7 +329,7 @@
     }
   }
   async function openShooting() {
-    if (await flush()) shooting = true;
+    if (!switching && (await flush()) && !switching) shooting = true;
   }
   async function closeShooting() {
     await flush();
@@ -238,8 +337,10 @@
   }
   async function addSetup(event: SubmitEvent) {
     event.preventDefault();
+    if (switching) return;
+    const target = db;
     try {
-      await db.saveSetup({
+      await target.saveSetup({
         id: crypto.randomUUID(),
         name: setupName,
         bowType: setupBow,
@@ -247,6 +348,7 @@
         updatedAt: new Date().toISOString(),
         revision: 0,
       });
+      if (target !== db || switching) return;
       setupName = '';
       setupNotes = '';
       error = '';
@@ -255,7 +357,8 @@
     }
   }
   async function closeEditor() {
-    if (await flush()) draft = null;
+    const source = db;
+    if ((await flush()) && source === db && !switching) draft = null;
   }
   function dateLabel(value: string) {
     return new Date(`${value}T12:00:00`).toLocaleDateString(
@@ -283,25 +386,12 @@
     window.addEventListener('online', update);
     window.addEventListener('offline', update);
     window.addEventListener('beforeunload', leave);
-    const subscription = liveQuery(async () => ({
-      sessions: await db.sessions.orderBy('date').reverse().toArray(),
-      setups: await db.setups.orderBy('name').toArray(),
-    })).subscribe({
-      next: (data) => {
-        sessions = data.sessions;
-        setups = data.setups;
-        loaded = true;
-      },
-      error: (e) => {
-        error = message(e);
-      },
-    });
     if ('serviceWorker' in navigator)
       void navigator.serviceWorker.ready.then(() => {
         offlineReady = true;
       });
     return () => {
-      subscription.unsubscribe();
+      journal?.stop();
       window.removeEventListener('online', update);
       window.removeEventListener('offline', update);
       window.removeEventListener('beforeunload', leave);
@@ -376,226 +466,248 @@
     <AccountPanel
       {t}
       {online}
-      {loaded}
+      loaded={loaded && !switching}
       bind:open={accountOpen}
       onbackup={exportData}
+      onaccount={changeAccount}
     />
-    {#if error}<div class="error" role="alert">
-        <strong>{t('Your work needs attention.')}</strong>
-        {t(error as MessageKey)}
-        <button onclick={exportData}>{t('Export a backup')}</button
-        >{#if dirty}<button onclick={() => void flush()}
-            >{t('Retry save')}</button
-          >{/if}
-      </div>{/if}
-    {#if view === 'training'}
-      <section class="page-heading">
-        <div>
-          <h1>{t('My training')}</h1>
-        </div>
-        <button class="primary" onclick={start} disabled={!loaded || saving}
-          >{t('＋ Log a session')}</button
-        >
-      </section>
-      <div class="stats">
-        <div>
-          <span>{t('Completed sessions')}</span><strong
-            >{completed.length}<small>{t('sessions')}</small></strong
-          >
-        </div>
-        <div>
-          <span>{t('Arrows shot')}</span><strong
-            >{arrowCount.toLocaleString(locale)}<small>{t('arrows')}</small
-            ></strong
-          >
-        </div>
-        <div>
-          <span>{t('Time at the range')}</span><strong
-            >{Math.floor(minutes / 60)}<small>{t('h')}</small>
-            {minutes % 60}<small>{t('min')}</small></strong
-          >
-        </div>
-      </div>
-      <ActivityCalendar
-        {sessions}
-        {selectedDay}
-        {locale}
+    {#if switching}<p role="status">{t('Opening account journal…')}</p>{/if}
+    <div hidden={switching} inert={switching}>
+      <SyncStatus
         {t}
-        onselect={selectDay}
+        userId={accountId}
+        status={syncStatus}
+        pending={syncStates.filter((state) => state.dirty).length}
+        conflicts={syncStates.filter((state) => state.conflict)}
+        {syncing}
+        {online}
+        onsync={() => journal?.sync()}
+        onresolve={resolveSync}
       />
-      <div class:has-editor={draft !== null} class="training-grid">
-        <TrainingJournal
-          sessions={daySessions}
+      {#if error}<div class="error" role="alert">
+          <strong>{t('Your work needs attention.')}</strong>
+          {t(error as MessageKey)}
+          <button onclick={exportData}>{t('Export a backup')}</button
+          >{#if dirty}<button onclick={() => void flush()}
+              >{t('Retry save')}</button
+            >{/if}
+        </div>{/if}
+      {#if view === 'training'}
+        <section class="page-heading">
+          <div>
+            <h1>{t('My training')}</h1>
+          </div>
+          <button class="primary" onclick={start} disabled={!loaded || saving}
+            >{t('＋ Log a session')}</button
+          >
+        </section>
+        <div class="stats">
+          <div>
+            <span>{t('Completed sessions')}</span><strong
+              >{completed.length}<small>{t('sessions')}</small></strong
+            >
+          </div>
+          <div>
+            <span>{t('Arrows shot')}</span><strong
+              >{arrowCount.toLocaleString(locale)}<small>{t('arrows')}</small
+              ></strong
+            >
+          </div>
+          <div>
+            <span>{t('Time at the range')}</span><strong
+              >{Math.floor(minutes / 60)}<small>{t('h')}</small>
+              {minutes % 60}<small>{t('min')}</small></strong
+            >
+          </div>
+        </div>
+        <ActivityCalendar
+          {sessions}
           {selectedDay}
-          {filtered}
-          {loaded}
-          bind:query
-          selectedId={draft?.id}
+          {locale}
           {t}
-          {dateLabel}
-          onopen={openSession}
-          onstart={start}
-          onexport={exportJournal}
+          onselect={selectDay}
         />
-        {#if draft}
-          <section class="editor" aria-label={t('Session editor')}>
-            <div class="editor-heading">
-              <div>
-                <p class="eyebrow">
+        <div class:has-editor={draft !== null} class="training-grid">
+          <TrainingJournal
+            sessions={daySessions}
+            {selectedDay}
+            {filtered}
+            {loaded}
+            bind:query
+            selectedId={draft?.id}
+            {t}
+            {dateLabel}
+            onopen={openSession}
+            onstart={start}
+            onexport={exportJournal}
+          />
+          {#if draft}
+            <section class="editor" aria-label={t('Session editor')}>
+              <div class="editor-heading">
+                <div>
+                  <p class="eyebrow">
+                    {t(
+                      draft.status === 'draft'
+                        ? 'SESSION IN PROGRESS'
+                        : 'SESSION DETAILS',
+                    )}
+                  </p>
+                  <h2>{draft.title || t('New practice')}</h2>
+                </div>
+                <button
+                  class="icon-button"
+                  aria-label={t('Close session')}
+                  onclick={closeEditor}>✕</button
+                >
+              </div>
+              <div class="save-status" aria-live="polite">
+                <span class="status-dot" class:offline={dirty}></span>{saveLabel
+                  ? t(saveLabel as MessageKey)
+                  : t('Ready to save')}
+              </div>
+              <SessionExport
+                label="Export this session"
+                {t}
+                onexport={exportSession}
+              />
+              <RoundSettings bind:session={draft} {t} onchange={changed} />
+              <TrainingTimer
+                session={draft}
+                {t}
+                onstart={() => updateTraining(startTimer)}
+                onstop={() => updateTraining(stopTimer)}
+                onmanual={(minutes) =>
+                  updateTraining((session) =>
+                    setManualDuration(session, minutes),
+                  )}
+              />
+              <SessionFields
+                bind:session={draft}
+                {setups}
+                {t}
+                onchange={changed}
+                onsetup={selectSetup}
+              />
+              <RoundSummary session={draft} {t} />
+              <button class="primary shooting-launch" onclick={openShooting}
+                >{t(
+                  draft.status === 'draft'
+                    ? 'Open shooting mode'
+                    : 'View scorecard',
+                )}</button
+              >
+              <div class="editor-actions">
+                <span>{t('Only visible to you')}</span
+                >{#if draft.status === 'draft'}<button
+                    class="primary"
+                    disabled={saving}
+                    onclick={finish}>{t('Finish session ✓')}</button
+                  >{:else}<button
+                    class="secondary"
+                    onclick={() => {
+                      if (draft) {
+                        draft.status = 'draft';
+                        changed();
+                      }
+                    }}>{t('Reopen as draft')}</button
+                  >{/if}
+              </div>
+            </section>
+          {:else}<aside class="practice-card">
+              <div class="rainbow-stripe" aria-hidden="true"></div>
+              <p class="eyebrow">{t('YOUR OWN PACE')}</p>
+              <h2>{t('Build a practice')}<br />{t('you can look back on.')}</h2>
+              <p>
+                {t(
+                  'Keep the details that matter: your bow, your arrows, and what you learned.',
+                )}
+              </p>
+              <div class="practice-detail">
+                <span>01</span>
+                <div>
+                  <strong>{t('Set up your bow')}</strong>
+                  <p>{t('Recurve, compound, or barebow.')}</p>
+                </div>
+              </div>
+              <div class="practice-detail">
+                <span>02</span>
+                <div>
+                  <strong>{t('Make a note of it')}</strong>
+                  <p>{t('Technique work counts, too.')}</p>
+                </div>
+              </div>
+              <button class="secondary" onclick={() => (view = 'equipment')}
+                >{t('Manage equipment ↗')}</button
+              >
+            </aside>{/if}
+        </div>
+      {:else}
+        <section class="page-heading">
+          <div>
+            <p class="eyebrow">{t('KNOW YOUR SETUP')}</p>
+            <h1>{t('Equipment')}</h1>
+            <p>
+              {t('The bows you shoot, with the details worth remembering.')}
+            </p>
+          </div>
+        </section>
+        <div class="equipment-grid">
+          <section>
+            <div class="section-title">
+              <h2>{t('Your setups')}</h2>
+              <span>{setups.length} {t('setups')}</span>
+            </div>
+            {#if !setups.length}<div class="empty">
+                <h3>{t('A place for your bow.')}</h3>
+                <p>
                   {t(
-                    draft.status === 'draft'
-                      ? 'SESSION IN PROGRESS'
-                      : 'SESSION DETAILS',
+                    'Add your first setup to attach it to a training session.',
                   )}
                 </p>
-                <h2>{draft.title || t('New practice')}</h2>
-              </div>
-              <button
-                class="icon-button"
-                aria-label={t('Close session')}
-                onclick={closeEditor}>✕</button
-              >
-            </div>
-            <div class="save-status" aria-live="polite">
-              <span class="status-dot" class:offline={dirty}></span>{saveLabel
-                ? t(saveLabel as MessageKey)
-                : t('Ready to save')}
-            </div>
-            <SessionExport
-              label="Export this session"
-              {t}
-              onexport={exportSession}
-            />
-            <RoundSettings bind:session={draft} {t} onchange={changed} />
-            <TrainingTimer
-              session={draft}
-              {t}
-              onstart={() => updateTraining(startTimer)}
-              onstop={() => updateTraining(stopTimer)}
-              onmanual={(minutes) =>
-                updateTraining((session) =>
-                  setManualDuration(session, minutes),
-                )}
-            />
-            <SessionFields
-              bind:session={draft}
-              {setups}
-              {t}
-              onchange={changed}
-              onsetup={selectSetup}
-            />
-            <RoundSummary session={draft} {t} />
-            <button class="primary shooting-launch" onclick={openShooting}
-              >{t(
-                draft.status === 'draft'
-                  ? 'Open shooting mode'
-                  : 'View scorecard',
-              )}</button
-            >
-            <div class="editor-actions">
-              <span>{t('Only visible to you')}</span
-              >{#if draft.status === 'draft'}<button
-                  class="primary"
-                  disabled={saving}
-                  onclick={finish}>{t('Finish session ✓')}</button
-                >{:else}<button
-                  class="secondary"
-                  onclick={() => {
-                    if (draft) {
-                      draft.status = 'draft';
-                      changed();
-                    }
-                  }}>{t('Reopen as draft')}</button
-                >{/if}
-            </div>
+              </div>{/if}{#each setups as setup}<article class="setup-card">
+                <span class="pill completed">{t(setup.bowType)}</span>
+                <h3>{setup.name}</h3>
+                <p>{setup.notes || t('No setup notes yet.')}</p>
+              </article>{/each}
           </section>
-        {:else}<aside class="practice-card">
-            <div class="rainbow-stripe" aria-hidden="true"></div>
-            <p class="eyebrow">{t('YOUR OWN PACE')}</p>
-            <h2>{t('Build a practice')}<br />{t('you can look back on.')}</h2>
-            <p>
-              {t(
-                'Keep the details that matter: your bow, your arrows, and what you learned.',
-              )}
+          <section class="editor">
+            <h2>{t('Add a setup')}</h2>
+            <form onsubmit={addSetup}>
+              <label
+                >{t('Setup name')}<input
+                  required
+                  maxlength="120"
+                  placeholder={t('My outdoor recurve')}
+                  bind:value={setupName}
+                /></label
+              ><label
+                >{t('Bow type')}<select bind:value={setupBow}
+                  >{#each bowTypes as type}<option value={type}
+                      >{t(type)}</option
+                    >{/each}</select
+                ></label
+              ><label
+                >{t('Equipment and tuning notes')}<textarea
+                  rows="6"
+                  placeholder={t(
+                    'Bow, limbs, draw weight, arrows, sight marks…',
+                  )}
+                  bind:value={setupNotes}></textarea></label
+              ><button class="primary" disabled={!loaded}
+                >{t('Save setup')}</button
+              >
+            </form>
+            <p class="field-hint">
+              {t('A copy of your setup is kept with each session.')}
             </p>
-            <div class="practice-detail">
-              <span>01</span>
-              <div>
-                <strong>{t('Set up your bow')}</strong>
-                <p>{t('Recurve, compound, or barebow.')}</p>
-              </div>
-            </div>
-            <div class="practice-detail">
-              <span>02</span>
-              <div>
-                <strong>{t('Make a note of it')}</strong>
-                <p>{t('Technique work counts, too.')}</p>
-              </div>
-            </div>
-            <button class="secondary" onclick={() => (view = 'equipment')}
-              >{t('Manage equipment ↗')}</button
-            >
-          </aside>{/if}
-      </div>
-    {:else}
-      <section class="page-heading">
-        <div>
-          <p class="eyebrow">{t('KNOW YOUR SETUP')}</p>
-          <h1>{t('Equipment')}</h1>
-          <p>{t('The bows you shoot, with the details worth remembering.')}</p>
+          </section>
         </div>
-      </section>
-      <div class="equipment-grid">
-        <section>
-          <div class="section-title">
-            <h2>{t('Your setups')}</h2>
-            <span>{setups.length} {t('setups')}</span>
-          </div>
-          {#if !setups.length}<div class="empty">
-              <h3>{t('A place for your bow.')}</h3>
-              <p>
-                {t('Add your first setup to attach it to a training session.')}
-              </p>
-            </div>{/if}{#each setups as setup}<article class="setup-card">
-              <span class="pill completed">{t(setup.bowType)}</span>
-              <h3>{setup.name}</h3>
-              <p>{setup.notes || t('No setup notes yet.')}</p>
-            </article>{/each}
-        </section>
-        <section class="editor">
-          <h2>{t('Add a setup')}</h2>
-          <form onsubmit={addSetup}>
-            <label
-              >{t('Setup name')}<input
-                required
-                maxlength="120"
-                placeholder={t('My outdoor recurve')}
-                bind:value={setupName}
-              /></label
-            ><label
-              >{t('Bow type')}<select bind:value={setupBow}
-                >{#each bowTypes as type}<option value={type}>{t(type)}</option
-                  >{/each}</select
-              ></label
-            ><label
-              >{t('Equipment and tuning notes')}<textarea
-                rows="6"
-                placeholder={t('Bow, limbs, draw weight, arrows, sight marks…')}
-                bind:value={setupNotes}></textarea></label
-            ><button class="primary" disabled={!loaded}
-              >{t('Save setup')}</button
-            >
-          </form>
-          <p class="field-hint">
-            {t('A copy of your setup is kept with each session.')}
-          </p>
-        </section>
-      </div>
-    {/if}
+      {/if}
+    </div>
   </main>
 </div>
 
-{#if shooting && draft}
+{#if shooting && draft && !switching}
   <ShootingView
     session={draft}
     {t}

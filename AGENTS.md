@@ -59,8 +59,10 @@ Read README.md and PROJECT_PLAN.md before expanding scope. Preserve the agreed S
 
 ## Supabase changes
 
+- Provide SQL and concise dashboard instructions for the owner to run. Do not automate the Supabase dashboard unless explicitly requested.
+
 - Ask the project owner before any Supabase configuration or resource change that could increase costs. Do not upgrade plans or enable paid services without approval.
-- Authentication does not imply synchronization. Keep the local journal explicitly device-local until account isolation and an approved migration flow are implemented.
+- Keep guest, legacy, and account journals isolated. Do not import guest or legacy data into an account without explicit user authorization. The owner approved starting fresh for the initial synchronization release.
 
 ## Verification and delivery
 

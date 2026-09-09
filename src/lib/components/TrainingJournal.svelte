@@ -94,6 +94,8 @@
             >
           </div>
           <h3>{session.title || t('Untitled practice')}</h3>
+          {#if session.conflictOf}<span class="pill">{t('Conflict copy')}</span
+            >{/if}
           <p>
             {t(session.setup?.bowType ?? 'No bow selected')} · {session.distance}
             m · {t(session.environment)}
@@ -114,6 +116,6 @@
         </button>{/each}
     </div>{/if}
   <p class="local-note">
-    {t('Private on this device. Export a backup to keep another copy.')}
+    {t('Export a backup to keep another copy of this journal.')}
   </p>
 </section>
